@@ -10,13 +10,18 @@ import { Drawer as MUIDrawer,
     Divider,
     Button,
     CssBaseline, 
-    Box
+    Box,
+    Dialog, 
+    DialogActions, 
+    DialogContent, 
+    DialogContentText, 
+    DialogTitle
 } from "@mui/material";
 import  MenuIcon  from '@mui/icons-material/Menu';
 import { ChevronRight,ChevronLeft } from "@mui/icons-material";
 import { useNavigate } from "react-router-dom";
 import { theme } from "../../Theme/themes";
-import { DataTable } from '../../components';
+import { DataTable, CoffeeForm } from '../../components';
 
 
 const drawerWidth = 240;
@@ -54,7 +59,6 @@ const myStyles = {
         width: drawerWidth,
         alignItems: 'center',
         padding: theme.spacing(0, 1),
-        // necessary for content to be below app bar
         ...theme.mixins.toolbar,
         justifyContent: 'flex-end',
       },
@@ -87,12 +91,20 @@ const myStyles = {
 export const Dashboard = () => {
     const navigate = useNavigate();
     const [open, setOpen] = useState(false);
+    const [dialogOpen, setDialogOpen] = useState(false);
 
     const handleDrawerOpen = () => {
         setOpen(true)
     }
     const handleDrawerClose = () => {
         setOpen(false)
+    }
+    const handleDialogOpen = () => {
+        setDialogOpen(true);
+    }
+
+    const handleDialogClose = () => {
+        setDialogOpen(false);
     }
 
     const itemList = [
@@ -124,6 +136,19 @@ export const Dashboard = () => {
                         <MenuIcon />
                     </IconButton>
                     <Typography variant='h6' noWrap>Dashboard</Typography>
+                    <Button sx={myStyles.toolbar_button} onClick={handleDialogOpen}>Create New Coffee</Button>
+                        {/*Dialog Pop Up begin */}
+                        <Dialog open={dialogOpen} onClose={handleDialogClose} aria-labelledby="form-dialog-title">
+                        <DialogTitle id="form-dialog-title">Add New Coffee</DialogTitle>
+                        <DialogContent>
+                            <DialogContentText>Add A New Coffee</DialogContentText>
+                            <CoffeeForm />
+                        </DialogContent>
+                        <DialogActions>
+                            <Button onClick={handleDialogClose} color="warning">Cancel</Button>
+                        </DialogActions>
+
+                        </Dialog>
                     <Button sx={myStyles.toolbar_button}>Enter Newest Roast</Button>
                 </Toolbar>
             </AppBar>

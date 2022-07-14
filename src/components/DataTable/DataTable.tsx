@@ -1,6 +1,16 @@
-import * as React from 'react';
-import Box from '@mui/material/Box';
-import { DataGrid, GridColDef, GridValueGetterParams } from '@mui/x-data-grid';
+import React, { useState } from 'react';
+import { DataGrid, GridColDef, GridSelectionModel } from '@mui/x-data-grid';
+import { serverCalls } from '../../api'
+import { useGetData } from '../../custom-hooks';
+import {
+    Button,
+    Dialog,
+    DialogActions,
+    DialogContent,
+    DialogContentText,
+    DialogTitle
+} from '@mui/material'
+import { CoffeeForm } from '../../components/CoffeeForm';
 
 const columns: GridColDef[] = [
   { field: 'id', headerName: 'ID', width: 90 },
@@ -11,8 +21,8 @@ const columns: GridColDef[] = [
     editable: true,
   },
   {
-    field: 'blend',
-    headerName: 'Blend',
+    field: 'name',
+    headerName: 'Name/Blend',
     width: 150,
     editable: true,
   },
@@ -21,33 +31,73 @@ const columns: GridColDef[] = [
     headerName: 'Roast',
     width: 110,
     editable: true,
+  },
+  {
+    field: 'description',
+    headerName: 'Description',
+    width: 110,
+    editable: true,
+  },
+  {
+    field: 'place_of_origin',
+    headerName: 'Place of Origin',
+    width: 110,
+    editable: true,
   }
 
 ];
 
-const rows = [
-  { id: 1, blend: 'Venezuela', caffeineContent: 'High', roast: 'Medium' },
-  { id: 2, blend: 'Jamaican Blue Mountain', caffeineContent: 'High', roast: 'Medium' },
-  { id: 3, blend: 'Verona', caffeineContent: 'Medium', roast: 'Dark' },
-  { id: 4, blend: 'Anniversary', caffeineContent: 'High', roast: 'Medium' },
-  { id: 5, blend: 'French', caffeineContent: 'Medium', roast: 'Dark' },
-  { id: 6, blend: 'Italian', caffeineContent: 'Medium', roast: 'Dark' },
-  { id: 7, blend: 'Kona', caffeineContent: 'Low', roast: 'Light' },
-  { id: 8, blend: 'Holiday', caffeineContent: 'Decaf', roast: 'Medium' },
-  { id: 9, blend: 'Kenya', caffeineContent: 'Medium', roast: 'Medium' },
-];
+interface gridData {
+    data: {
+        id?: string;
+        name?: string;
+
+    }
+}
 
 export const DataTable = () => {
-  return (
-    <Box sx={{ height: 400, width: '100%' }}>
-      <DataGrid
-        rows={rows}
-        columns={columns}
-        pageSize={5}
-        rowsPerPageOptions={[5]}
-        checkboxSelection
-        disableSelectionOnClick
-      />
-    </Box>
-  );
+    let { coffeeData, getData } = useGetData();
+    let [open, setOpen] = useState(false);
+    let [gridData, setData] = useState<GridSelectionModel>([])
+
+
+    let handleOpen = () => setOpen(true);
+
+    let handleClose = () => setOpen(false);
+
+    let deleteData = async () => {
+        await serverCalls.delete(`${gridData[0]}`)
+        getData();
+    }
+    console.log(gridData) 
+    return (
+        <div style={{ height: 400, width: '100%' }}>
+            <h2>Beans Available</h2>
+            <DataGrid
+                rows={coffeeData}
+                columns={columns}
+                pageSize={5}
+                rowsPerPageOptions={[5]}
+                checkboxSelection
+                disableSelectionOnClick
+                onSelectionModelChange={newSelectionModel => setData(newSelectionModel)}
+                {...coffeeData}
+            />
+            <Button onClick={handleOpen}>Update</Button>
+            <Button variant="contained" color="secondary" onClick={deleteData}>Delete</Button>
+
+            {/*Dialog Pop Up begin */}
+            <Dialog open={open} onClose={handleClose} aria-labelledby="form-dialog-title">
+                <DialogTitle id="form-dialog-title">Update One Coffee</DialogTitle>
+                <DialogContent>
+                    <DialogContentText>Coffee id: {gridData[0]}</DialogContentText>
+                    <CoffeeForm id={`${gridData[0]}`} />
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={handleClose} color="primary">Cancel</Button>
+
+                </DialogActions>
+            </Dialog>
+        </div>
+    );
 }
